@@ -1,8 +1,8 @@
-#ifndef SHELLSORTER
-#define SHELLSORTER
+#ifndef SHELLSORT
+#define SHELLSORT
 
 template <typename T>
-class ShellSorter {
+class ShellSort {
 public:
     //klasyczne odstępy Shella
     static void sortWithShell(T* arr, int n) {
