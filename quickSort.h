@@ -1,11 +1,11 @@
-#ifndef QUICKS
-#define QUICKS
+#ifndef QUICKS_H
+#define QUICKS_H
 #include <algorithm> //dla funkcji swap
 
 template <typename T>
 class QuickSort {
 private:
-    void sortQ(T* arr, int left, int right) {
+    void static sortQ(T* arr, int left, int right) {
         if (left >= right) return; 
             int m = partition(arr, left, right); //znajduję punkt podziału
             sortQ(arr, left, m); //rekurencyjnie sortuję lewą część

@@ -1,5 +1,5 @@
-#ifndef SHELLSORT
-#define SHELLSORT
+#ifndef SHELLSORT_H
+#define SHELLSORT_H
 
 template <typename T>
 class ShellSort {
