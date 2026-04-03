@@ -11,7 +11,7 @@ public:
     static T* normalArray(int size) {
         T* tab = new T[size];
         for (int i = 0; i < size; i++) {
-            tab[i] = rand() % 5000; //większy zakres liczb dla lepszych testów
+            tab[i] = rand() % 50;
         }
         return tab;
     }
