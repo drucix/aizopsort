@@ -3,10 +3,11 @@
 
 class App {
 public:
-    App();       // Konstruktor
-    void run();  // Główna pętla/menu
+    App();       
+    ~App();      
+    void run(); //menu z typem danych
 
-    // Metoda szablonowa musi zostać w pliku nagłówkowym
+    //funkcja do weryfikacji sortowania
     template <typename T>
     bool isSorted(T* arr, int n) {
         for (int i = 0; i < n - 1; ++i) {
@@ -18,10 +19,20 @@ public:
     }
 
 private:
-    void fillRandom(int* arr, int n);
-    void printArray(int* arr, int n);
-    void copyArray(int* src, int* dest, int n);
-    void testShellSort();
+    //menu z operacjami 
+    template <typename T>
+    void subMenu(); 
+
+    //funkcje pomocnicze 
+    template <typename T>
+    void printArray(T* arr, int n);
+
+    template <typename T>
+    void copyArray(T* src, T* dest, int n);
+
+    //funkcja do testowania wydajności
+    template <typename T>
+    void runPerformanceTest();
 };
 
 #endif

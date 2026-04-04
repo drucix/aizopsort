@@ -1,7 +1,7 @@
 #include "App.h"
 
 int main() {
-    App myApp; //obiekt mojej klasy App
-    myApp.run(); //odpalam App
+    App myApp; 
+    myApp.run(); 
     return 0;
 }

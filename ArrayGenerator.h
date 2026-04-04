@@ -11,7 +11,8 @@ public:
     static T* normalArray(int size) {
         T* tab = new T[size];
         for (int i = 0; i < size; i++) {
-            tab[i] = rand() % 50;
+            double randomValue = static_cast<double>(rand()) / RAND_MAX; //losowa wartość z zakresu [0, 1]
+            tab[i] = static_cast<T>(randomValue * 500); //skalowanie do zakresu [0, 500]
         }
         return tab;
     }
