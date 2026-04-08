@@ -1,8 +1,6 @@
 #ifndef QUICKS_H
 #define QUICKS_H
 
-#include <algorithm>
-
 template <typename T>
 class QuickSort {
 
