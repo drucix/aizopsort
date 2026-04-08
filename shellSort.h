@@ -5,7 +5,7 @@ template <typename T>
 class ShellSort {
 public:
     //klasyczne odstępy Shella
-    static void sortWithShell(T* arr, int n) {
+    void sortWithShell(T* arr, int n) {
         for (int gap = n / 2; gap > 0; gap /= 2) { //zmniejszam odstępy o pół aż gap będzie 0
             for (int i = gap; i < n; i++) { //od gap do końca tablicy
                 T temp = arr[i]; //element do wstawienia
@@ -19,12 +19,12 @@ public:
     }
 
     //odstępy Knutha
-    static void sortWithKnuth(T* arr, int n) {
+    void sortWithKnuth(T* arr, int n) {
         int gap = 1;
         while (gap < n / 3) { //zwiekszam odstępy według wzoru Knutha aż gap będzie większy niż n/3
             gap = gap * 3 + 1; 
         }
-        while (gap > 0) {//działa tak samo przez wstawianie tylko zmienia jest w obliczaniu gap
+        while (gap > 0) {//działa tak samo przez wstawianie tylko zmiana jest w obliczaniu gap
             for (int i = gap; i < n; i += 1) {
                 T temp = arr[i];
                 int j;
