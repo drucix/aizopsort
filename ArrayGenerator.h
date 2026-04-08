@@ -2,56 +2,70 @@
 #define ARRAYGENERATOR_H
 
 #include <cstdlib>
-#include <algorithm> //potrzebne do szybkiego posortowania 33% i 66% tablicy
+#include "quickSort.h"
 
 class ArrayGenerator {
+
+//generuje tablice o roznych cechach, kazda funkcja zwraca wskaznik do tablicy
 public:
-    //tablica całkowicie losowa
+    //tablica calkowicie losowa
     template<typename T>
-    static T* normalArray(int size) {
+    T* normalArray(int size) {
         T* tab = new T[size];
         for (int i = 0; i < size; i++) {
-            double randomValue = static_cast<double>(rand()) / RAND_MAX; //losowa wartość z zakresu [0, 1]
-            tab[i] = static_cast<T>(randomValue * 500); //skalowanie do zakresu [0, 500]
+            double randomValue = static_cast<double>(rand()) / RAND_MAX;    //losowy double z zakresu [0, 1]
+            tab[i] = static_cast<T>(randomValue * 500);         //skalowanie do zakresu 0-500 i rzutuje na typ T
         }
         return tab;
     }
 
-    //tablica posortowana rosnąco
+    //tablica posortowana rosnaco
     template<typename T>
-    static T* sortedArray(int size) {
-        T* tab = new T[size];
-        for (int i = 0; i < size; i++) {
-            tab[i] = i; 
+    T* sortedArray(int size) {
+        T* tab = normalArray<T>(size);
+        QuickSort<T> quick;
+        quick.sort(tab, size);  //używam tu quicksorta
+        return tab;
+    }
+
+    //tablica posortowana malejaco
+    template<typename T>
+    T* descendingArray(int size) {
+        T* tab = sortedArray<T>(size);  //najpierw sortuje rosnaco
+
+        //odwracam tablice, żeby była posortowana malejaco
+        for (int i = 0; i < size / 2; i++) {
+            T temp = tab[i];
+            tab[i] = tab[size - 1 - i];
+            tab[size - 1 - i] = temp;
         }
         return tab;
     }
 
-    //tablica posortowana malejąco
+    //tablica czesciowo posortowana 
     template<typename T>
-    static T* descendingArray(int size) {
-        T* tab = new T[size];
-        for (int i = 0; i < size; i++) {
-            tab[i] = size - i;
+    T* partiallySortedArray(int size, int percentSorted) {
+        T* tab = normalArray<T>(size);
+        
+        int sortedSize = (size * percentSorted) / 100;      //obliczam ile dokladnie elementów ma być posortowanych
+
+        if (sortedSize > 1) {
+            QuickSort<T> quick;
+            quick.sort(tab, sortedSize);        //sortuje te elementy
         }
-        return tab;
-    }
+        
+        //dodatkowo mieszam reszte elementów, żeby nie były posortowane
+        if (sortedSize < size) {
+            for (int i = sortedSize; i < size; i++) {
+                int j = sortedSize + rand() % (size - sortedSize);
+                
+                //zamieniam bieżący element z losowym elementem z nieposortowanej części tablicy
+                T temp = tab[i];
+                tab[i] = tab[j];
+                tab[j] = temp;
+            }
+        }
 
-    //tablica posortowana w 33%
-    template<typename T>
-    static T* sorted33(int size) {
-        T* tab = normalArray<T>(size); //tworze losową
-        int sortedSize = size / 3;
-        std::sort(tab, tab + sortedSize); //szybko sortowane tylko początkowe 33%
-        return tab;
-    }
-
-    //tablica posortowana w 66%
-    template<typename T>
-    static T* sorted66(int size) {
-        T* tab = normalArray<T>(size); //tworze losową
-        int sortedSize = (size * 2) / 3;
-        std::sort(tab, tab + sortedSize); //szybko sortowane tylko początkowe 66%
         return tab;
     }
 };
