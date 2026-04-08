@@ -1,49 +1,58 @@
 #ifndef HEAPSORT_H
 #define HEAPSORT_H
 
-#include <algorithm>
 
 template <typename T>
 class HeapSort {
 public:
-    static void sort(T* arr, int n) {
-        // Krok 1: Budowanie kopca (reorganizacja tablicy)
+    void sort(T* arr, int n) {
+        //tablica 0 lub 1 elementowa jest już posortowana
+        if (n <= 1) return;
+
+        //buduje kopca
+        //zaczynam od ostatniego węzła, który ma potomków (n/2 - 1) i idę w górę
         for (int i = n / 2 - 1; i >= 0; i--) {
             heapify(arr, n, i);
         }
 
-        // Krok 2: Ekstrakcja elementów z kopca
+        //wyciągam elementy z kopca.
+        //największy element (korzeń) ląduje na końcu tablicy, a kopiec zmniejszam
         for (int i = n - 1; i > 0; i--) {
-            // Przeniesienie obecnego korzenia (największego elementu) na koniec
-            std::swap(arr[0], arr[i]);
-            // Przywrócenie własności kopca dla zmniejszonej tablicy
-            heapify(arr, i, 0);
+            T temp = arr[0]; //przeniesienie korzenia na koniec
+            arr[0] = arr[i];
+            arr[i] = temp;
+
+            //przywracam własności kopca dla pozostałych elementów
+            heapify(arr, i, 0); 
         }
     }
 
 private:
-    static void heapify(T* arr, int n, int i) {
-        int largest = i; // Inicjalizujemy największy jako korzeń
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
+    void heapify(T* arr, int n, int rootIndex) {
+        int largest = rootIndex;           //zakładam, że korzeń jest największy
+        int leftChild = 2 * rootIndex + 1; //indeks lewego potomka
+        int rightChild = 2 * rootIndex + 2; //indeks prawego potomka
 
-        // Jeśli lewe dziecko jest większe niż korzeń
-        if (left < n && arr[left] > arr[largest]) {
-            largest = left;
+        //sprawdzam, czy lewy potomek istnieje i czy jest większy od obecnego maksimum
+        if (leftChild < n && arr[leftChild] > arr[largest]) {
+            largest = leftChild;
         }
 
-        // Jeśli prawe dziecko jest większe niż dotychczasowy 'largest'
-        if (right < n && arr[right] > arr[largest]) {
-            largest = right;
+        //sprawdzamy, czy prawy potomek istnieje i czy jest większy od obecnego maksimum
+        if (rightChild < n && arr[rightChild] > arr[largest]) {
+            largest = rightChild;
         }
 
-        // Jeśli największy nie jest korzeniem
-        if (largest != i) {
-            std::swap(arr[i], arr[largest]);
-            // Rekurencyjnie naprawiamy poddrzewo
+        //jeśli największy element nie jest korzeniem, zamieniam je miejscami 
+        if (largest != rootIndex) {
+            T temp = arr[rootIndex];
+            arr[rootIndex] = arr[largest];
+            arr[largest] = temp;
+
+            //naprawa niższych poziomów kopca
             heapify(arr, n, largest);
         }
     }
 };
 
-#endif // HEAPSORT_H
+#endif 
