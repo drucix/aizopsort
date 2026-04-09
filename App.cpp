@@ -1,7 +1,7 @@
 #include "App.h"
 #include "shellSort.h"
 #include "quickSort.h"
-#include "arrayGenerator.h" 
+#include "arrayGenerator.h"
 #include "fileReader.h"
 #include "heapSort.h"
 #include "hybridSort.h"
@@ -15,10 +15,7 @@
 using namespace std;
 
 App::App() {
-    srand(static_cast<unsigned>(time(nullptr)));
-}
-
-App::~App() {
+    srand(static_cast<unsigned>(time(nullptr)));  //generator liczb losowych, dzięki któremu za każdym razem będą inne dane testowe
 }
 
 //MENU - wybor typu danych
@@ -32,12 +29,11 @@ void App::run() {
     cout << "Wybierz opcje: ";
     cin >> typeChoice;
 
+    //w zależności od wyboru typu danych, wywołuje odpowiednie podmenu z operacjami
     if (typeChoice == 1) {
         subMenu<int>();
     } else if (typeChoice == 2) {
         subMenu<float>();
-    } else if (typeChoice == 0) {
-        cout << "Zamykanie programu...\n";
     } else {
         cout << "Nieznana opcja!\n";
     }
@@ -46,24 +42,11 @@ void App::run() {
 //PODMENU - obsluguje operacje
 template <typename T>
 void App::subMenu() {
-    //zmienne lokalne  - obsługują obecny typ T
+    //wskazniki na dynamicznie allokowane tablice
     T* currArray = nullptr;
     T* sortedArray = nullptr;
     int currSize = 0;
     int choice = -1;
-
-    //funkcja do czyszczenia pamięci
-    auto clearMem = [&]() {
-        if (currArray != nullptr) {
-            delete[] currArray;
-            currArray = nullptr;
-        }
-        if (sortedArray != nullptr) {
-            delete[] sortedArray;
-            sortedArray = nullptr;
-        }
-        currSize = 0;
-    };
 
     while (choice != 0) {
         cout << "\n================ Wybierz operacje ================\n";
@@ -84,11 +67,21 @@ void App::subMenu() {
                 cin >> fileName;
 
                 int newSize = 0;
-                T* loadedArray = FileReader::readArray<T>(fileName, newSize);
+                FileReader reader;
+                T* loadedArray = reader.readArray<T>(fileName, newSize);    //wczytuje tablice z pliku
 
-                if (loadedArray != nullptr) {
-                    clearMem();
-                    currSize = newSize;
+                if (loadedArray != nullptr) {   //jezeli wczytanie sie powiodlo, to usuwam stare tablice z pamieci
+                    if (currArray != nullptr) {
+                        delete[] currArray;
+                        currArray = nullptr;
+                    }
+                    if (sortedArray != nullptr) {
+                        delete[] sortedArray;
+                        sortedArray = nullptr;
+                    }
+                    currSize = 0;
+
+                    currSize = newSize;         //przypisuje nowy rozmiar i tablice do aktualnych zmiennych
                     currArray = loadedArray;
                     cout << "Wczytano tablice o rozmiarze " << currSize << ".\n";
                 }
@@ -104,10 +97,20 @@ void App::subMenu() {
                     break;
                 }
 
-                clearMem(); 
+                if (currArray != nullptr) {     //zwalaniam pamiec przed generowaniem
+                    delete[] currArray;
+                    currArray = nullptr;
+                }
+                if (sortedArray != nullptr) {
+                    delete[] sortedArray;
+                    sortedArray = nullptr;
+                }
+                currSize = 0;
+
                 currSize = newRSize;
-                currArray = ArrayGenerator::normalArray<T>(currSize);
-                
+                ArrayGenerator generator;
+                currArray = generator.normalArray<T>(currSize);         //generuje nowa tablice
+
                 cout << "Wygenerowano tablice o rozmiarze " << currSize << ".\n";
                 break;
             }
@@ -115,7 +118,7 @@ void App::subMenu() {
                 if (currArray == nullptr) {
                     cout << "Brak tablicy! Wczytaj lub wygeneruj ja najpierw.\n";
                 } else {
-                    if (currSize <= 50) {
+                    if (currSize <= 50) {       //wyswietlam tylko dla malych tablic
                         cout << "Oryginalna tablica:\n";
                         printArray(currArray, currSize);
                     } else {
@@ -130,32 +133,38 @@ void App::subMenu() {
                     break;
                 }
 
-                if (sortedArray != nullptr) {
+                if (sortedArray != nullptr) {   //najpierw zwalniam pamiec 
                     delete[] sortedArray;
+                    sortedArray = nullptr;
                 }
-                sortedArray = new T[currSize];
-                copyArray(currArray, sortedArray, currSize);
+                sortedArray = new T[currSize];  //alokuje pamiec dla posortowanej tablicy
+                copyArray(currArray, sortedArray, currSize);        //kopiuje oryginalna tablice do posortowanej, zeby nie tracic danych
 
                 int algoChoice;
                 cout << "Wybierz algorytm (1-Shell(Klasyczny), 2-Shell(Knuth), 3-QuickSort, 4-HeapSort, 5-HybridSort): ";
                 cin >> algoChoice;
 
                 cout << "Sortowanie...\n";
-                switch (algoChoice) {
+                switch (algoChoice) {       //wywołuje odpowiedni algorytm sortowania w zależności od wyboru uzytkownika
                 case 1:
-                    ShellSort<T>::sortWithShell(sortedArray, currSize);
+                    ShellSort<T> ss;
+                    ss.sortWithShell(sortedArray, currSize);
                     break;
                 case 2:
-                    ShellSort<T>::sortWithKnuth(sortedArray, currSize);
+                    ShellSort<T> sk;
+                    sk.sortWithKnuth(sortedArray, currSize);
                     break;
                 case 3:
-                    QuickSort<T>::sort(sortedArray, currSize);
+                    QuickSort<T> qs;
+                    qs.sort(sortedArray, currSize);
                     break;
                 case 4:
-                    HeapSort<T>::sort(sortedArray, currSize);
+                    HeapSort<T> hs;
+                    hs.sort(sortedArray, currSize);
                     break;
                 case 5:
-                    HybridSort<T>::sort(sortedArray, currSize);
+                    HybridSort<T> hybrid;
+                    hybrid.sort(sortedArray, currSize);
                     break;
 
                 default:
@@ -167,16 +176,16 @@ void App::subMenu() {
                     break;
                 }
 
-                //wizualne wyświetlenie tylko dla małych tablic
+                //wizualne wyswietlenie tylko dla malych tablic
                 if (currSize <= 50) {
                     cout << "Posortowana tablica:\n";
                     printArray(sortedArray, currSize);
                 } else {
                     cout << "Tablica zostala posortowana, ale ze wzgledu na duzy rozmiar nie zostanie wyswietlona.\n";
                 }
-                
-                //weryfikacja poprawności sortowania
-                if(isSorted(sortedArray, currSize)) {
+
+                //weryfikacja poprawnosci sortowania
+                if (isSorted(sortedArray, currSize)) {
                     cout << "=> Weryfikacja: Tablica posortowana poprawnie!\n";
                 } else {
                     cout << "=> Weryfikacja: Tablica zle posortowana!\n";
@@ -187,7 +196,7 @@ void App::subMenu() {
                 if (sortedArray == nullptr) {
                     cout << "Tablica nie zostala jeszcze posortowana!\n";
                 } else {
-                    if (currSize <= 50) {
+                    if (currSize <= 50) {   //wyswietlam posortowana tablice tylko dla malych rozmiarow
                         cout << "Posortowana tablica:\n";
                         printArray(sortedArray, currSize);
                     } else {
@@ -198,23 +207,30 @@ void App::subMenu() {
             }
 
             case 6: {
-                runPerformanceTest<T>();
+                runPerformanceTest<T>();    //wywolanie funkcji do testowania wydajnosci
                 break;
             }
 
             case 0:
-                cout << "Zamykanie programu...\n";
                 break;
             default:
                 cout << "Nieznana opcja!\n";
         }
     }
-    
-    //posprzątanie pamięci przed całkowitym wyjściem z podmenu
-    clearMem();
+
+    //posprzatanie pamieci przed calkowitym wyjsciem z podmenu
+    if (currArray != nullptr) {
+        delete[] currArray;
+        currArray = nullptr;
+    }
+    if (sortedArray != nullptr) {
+        delete[] sortedArray;
+        sortedArray = nullptr;
+    }
+    currSize = 0;
 }
 
-template <typename T>
+template <typename T>       //funkcja pomcnicza do wyswietlania tablicy
 void App::printArray(T* arr, int n) {
     for (int i = 0; i < n; ++i) {
         cout << arr[i] << " ";
@@ -222,14 +238,14 @@ void App::printArray(T* arr, int n) {
     cout << "\n";
 }
 
-template <typename T>
+template <typename T>       //funkcja pomocnicza do kopiowania tablicy
 void App::copyArray(T* src, T* dest, int n) {
     for (int i = 0; i < n; ++i) {
         dest[i] = src[i];
     }
 }
 
-template <typename T>
+template <typename T>       //funkcja do testowania wydajnosci algorytmow sortowania
 void App::runPerformanceTest() {
     int algoChoice;
     cout << "\n--- TESTY WYDAJNOSCIOWE ---\n";
@@ -241,106 +257,137 @@ void App::runPerformanceTest() {
         return;
     }
 
-    if (algoChoice == 5 && !std::is_same<T, int>::value) {
+    //hybrydowy sort jest testowany tylko dla typu int
+    if (algoChoice == 5 && !std::is_same<T, int>::value) {      //używam type traits czy podane typy  w nawiasach są takie same, value zwraca true lub false
         cout << "\nHybridSort mozna tylko dla typu int!\n";
         return;
     }
-    //7 reprezentatywnych rozmiarów tablic
+
+    //zapisanie wynikow do pliku csv
+    ofstream plik("wyniki.csv", ios::app);      //otwieram plik w trybie dopisywania, uzywam 
+    if (!plik.is_open()) {
+        cout << "Nie udalo sie utworzyc pliku wyniki.csv!\n";
+        return;
+    }
+
+    //naglowki kolumn
+    plik << "Algorytm;Rozklad;Rozmiar;Prog;Czas_ms\n";
+
+    //7 reprezentatywnych rozmiarow tablic
     int sizes[] = {10000, 20000, 40000, 80000, 160000, 320000, 640000};
     int numSizes = 7;
-    int iterations = 100; //100 powtórzeń dla każdego rozmiaru i rozkładu
+    int iterations = 100; //100 powtorzen dla kazdego rozmiaru i rozkladu
     int thresholds[] = {5, 10, 20}; //3 progi
+    int numThresholds = 3;
 
     string distributions[] = {
-        "losowo", 
-        "rosnaco", 
-        "malejaco", 
-        "czesciowo posortowane (33%)", 
+        "losowo",
+        "rosnaco",
+        "malejaco",
+        "czesciowo posortowane (33%)",
         "czesciowo posortowane (66%)"
     };
 
     cout << "\nTesty w trakcie...\n";
 
-    //pętla przechodząca przez wszystkie 5 układów danych
+    ArrayGenerator g;
+    //pierwsza pętla przechodzi przez wszystkie 5 distributions
     for (int d = 0; d < 5; ++d) {
         cout << "\n--- Uklad danych: " << distributions[d] << " ---\n";
-        
+
+        //druga pętla przechodzi przez wszystkie rozmiary tablic
         for (int s = 0; s < numSizes; ++s) {
             int currentSize = sizes[s];
 
             //hybrydowy sort - dla roznych progow
             if (algoChoice == 5) {
-                for (int t = 0; t < sizeof(thresholds)/sizeof(thresholds[0]); ++t) {
+                //trzecia pętla przechodzi przez wszystkie progi dla hybrydowego sortu
+                for (int t = 0; t < numThresholds; ++t) {
                     int currentThreshold = thresholds[t];
-                    double totalTimeMs = 0.0;
-
+                    double totalTimeMs = 0.0;   //suma czasu dla 100 powtórzeń
+                    
+                    //pętla wykonuje 100 iteracji dla danego rozmiaru i rozkladu, żeby móc uśrednić wyniki
                     for (int i = 0; i < iterations; ++i) {
                         T* testArr = nullptr;
-                        switch(d) {
-                            case 0: testArr = ArrayGenerator::normalArray<T>(currentSize); break;
-                            case 1: testArr = ArrayGenerator::sortedArray<T>(currentSize); break;
-                            case 2: testArr = ArrayGenerator::descendingArray<T>(currentSize); break;
-                            case 3: testArr = ArrayGenerator::sorted33<T>(currentSize); break;
-                            case 4: testArr = ArrayGenerator::sorted66<T>(currentSize); break;
+                        switch (d) {
+                            case 0: testArr = g.normalArray<T>(currentSize); break;
+                            case 1: testArr = g.sortedArray<T>(currentSize); break;
+                            case 2: testArr = g.descendingArray<T>(currentSize); break;
+                            case 3: testArr = g.partiallySortedArray<T>(currentSize, 33); break;
+                            case 4: testArr = g.partiallySortedArray<T>(currentSize, 66); break;
                         }
 
-                        auto start = chrono::high_resolution_clock::now();
-                        HybridSort<T>::sort(testArr, currentSize, currentThreshold);
-                        auto end = chrono::high_resolution_clock::now();
+                        HybridSort<T> hyb;
 
-                        chrono::duration<double, std::milli> elapsed = end - start;
-                        totalTimeMs += elapsed.count();
-                        delete[] testArr; 
+                        auto start = chrono::high_resolution_clock::now();  //zaczynam mierzenie czasu dopiero po wygenerowaniu tablic
+                        hyb.sort(testArr, currentSize, currentThreshold);   //sortowanie
+                        auto end = chrono::high_resolution_clock::now();    //kończę mierzenie czasu zaraz po posortowaniu
+
+                        chrono::duration<double, std::milli> elapsed = end - start;     //obliczam czas trwania sortowania i rzutuje na milisekundy
+                        totalTimeMs += elapsed.count();                 //dodaje czas do sumy
+                        delete[] testArr;       //zwalniam pamiec po kazdej iteracji, zeby nie bylo przeciekow pamieci
                     }
 
-                    double avgTime = totalTimeMs / iterations;
-                    cout << "Rozmiar: " << setw(8) << currentSize 
-                         << " | Prog wstawiania: " << setw(2) << currentThreshold
-                         << " | Sredni czas: " << fixed << setprecision(3) << avgTime << " ms\n";
+                    double avgTime = totalTimeMs / iterations;      //obliczam średni czas dzieląc sumę przez liczbę iteracji
+                    cout << "Rozmiar: " << setw(8) << currentSize   //ustawiam szerokość pola dla rozmiaru, żeby ładnie się wyrównało w konsoli
+                         << " | Prog wstawiania: " << setw(2) << currentThreshold       //tak samo dla progu
+                         << " | Sredni czas: " << fixed << setprecision(3) << avgTime << " ms\n";   //ograniczam do 3 miejsc po przecinku 
+
+                    //zapis do pliku
+                    plik << algoChoice << ";" << distributions[d] << ";" << currentSize << ";"  
+                         << currentThreshold << ";" << fixed << setprecision(3) << avgTime << "\n"; //tutaj oddzielam wszystkie srednikiem, zeby wczytac potem do excela
                 }
-            } 
-            //pozostałe algorytmy
+            }
+            //pozostale algorytmy dzialaja tak jak dotychczas, bez progu, wiec wykonuje tylko 100 iteracji dla kazdego rozmiaru i rozkladu
             else {
                 double totalTimeMs = 0.0;
-
                 for (int i = 0; i < iterations; ++i) {
                     T* testArr = nullptr;
-                    switch(d) {
-                        case 0: testArr = ArrayGenerator::normalArray<T>(currentSize); break;
-                        case 1: testArr = ArrayGenerator::sortedArray<T>(currentSize); break;
-                        case 2: testArr = ArrayGenerator::descendingArray<T>(currentSize); break;
-                        case 3: testArr = ArrayGenerator::sorted33<T>(currentSize); break;
-                        case 4: testArr = ArrayGenerator::sorted66<T>(currentSize); break;
+                    switch (d) {
+                        case 0: testArr = g.normalArray<T>(currentSize); break;
+                        case 1: testArr = g.sortedArray<T>(currentSize); break;
+                        case 2: testArr = g.descendingArray<T>(currentSize); break;
+                        case 3: testArr = g.partiallySortedArray<T>(currentSize, 33); break;
+                        case 4: testArr = g.partiallySortedArray<T>(currentSize, 66); break;
                     }
 
                     auto start = chrono::high_resolution_clock::now();
-                    switch(algoChoice){
+                    switch (algoChoice) {
                         case 1:
-                            ShellSort<T>::sortWithShell(testArr, currentSize);
+                            ShellSort<T> shell;
+                            shell.sortWithShell(testArr, currentSize);
                             break;
                         case 2:
-                            ShellSort<T>::sortWithKnuth(testArr, currentSize);
+                            ShellSort<T> knuth;
+                            knuth.sortWithKnuth(testArr, currentSize);
                             break;
                         case 3:
-                            QuickSort<T>::sort(testArr, currentSize);
+                            QuickSort<T> quick;
+                            quick.sort(testArr, currentSize);
                             break;
                         case 4:
-                            HeapSort<T>::sort(testArr, currentSize);
+                            HeapSort<T> heap;
+                            heap.sort(testArr, currentSize);
                             break;
                     }
                     auto end = chrono::high_resolution_clock::now();
 
                     chrono::duration<double, std::milli> elapsed = end - start;
                     totalTimeMs += elapsed.count();
-                    delete[] testArr; 
+                    delete[] testArr;
                 }
 
                 double avgTime = totalTimeMs / iterations;
-                cout << "Rozmiar: " << setw(8) << currentSize 
+                cout << "Rozmiar: " << setw(8) << currentSize
                      << " | Sredni czas: " << fixed << setprecision(3) << avgTime << " ms\n";
+
+                plik << algoChoice << ";" << distributions[d] << ";" << currentSize << ";-;"
+                     << fixed << setprecision(3) << avgTime << "\n";
             }
         }
     }
+
+    plik.close();
     cout << "--------------------------------------------------\n";
     cout << "Testy zakonczone sukcesem!\n";
-}
+};

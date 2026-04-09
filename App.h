@@ -3,8 +3,7 @@
 
 class App {
 public:
-    App();       
-    ~App();      
+    App();          
     void run(); //menu z typem danych
 
     //funkcja do weryfikacji sortowania
